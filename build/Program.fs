@@ -230,14 +230,8 @@ let main(args: string[]) : int =
     | [| "integration-tests" |] -> integrationTests()
     | [| "build" |] -> buildSolution()
     | [| "version" |] -> printfn $"{converterVersion()}"
-
-    | [| "publish" |] ->
-        createAndPublishArtifacts()
-        
-    | [| "create-artifacts" |] ->
-        createArtifacts()
-
+    | [| "publish" |] -> createAndPublishArtifacts()
+    | [| "create-artifacts" |] -> createArtifacts()
     | [| "sync-bicep-converter" |] -> syncBicepConverter()
-    
     | otherwise -> printfn $"Unknown build arguments provided %A{otherwise}"
     0
