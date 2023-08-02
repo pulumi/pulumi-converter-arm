@@ -88,7 +88,7 @@ let main (args: string[]) =
 
                 match compilationResult with
                 | Error error ->
-                    printfn $"Failed to compile bicep file at {entryBicepFile}: {error}"
+                    printfn $"Failed to compile ARM file at {armFilePath}: {error}"
                 | Ok () ->
                     printfn $"Converted ARM into Pulumi at {pulumiTargetDirectory}"
                     let conversion =
@@ -101,7 +101,7 @@ let main (args: string[]) =
                         failwithf $"Failed to convert Pulumi program to TypeScript: {errorMessage}"
 
                     | Ok _ ->
-                        printfn $"Successfully converted {entryBicepFile} to TypeScript"
+                        printfn $"Successfully converted {armFilePath} to TypeScript"
         0
     with
     | ex ->

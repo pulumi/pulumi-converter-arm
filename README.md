@@ -2,6 +2,8 @@
 
 A Pulumi converter plugin to convert ARM templates to Pulumi languages. Currently work in progress.
 
+This plugin uses the converter logic from [pulumi-converter-bicep](https://github.com/Zaid-Ajaj/pulumi-converter-bicep). First it converts the ARM template to Bicep and then uses the Bicep converter to convert to Pulumi languages.
+
 ### Installation
 
 ```
@@ -86,6 +88,7 @@ const location = config.get("location") || currentResourceGroup.apply(currentRes
 // The name of the storage account
 const storageAccountName = config.get("storageAccountName") || currentResourceGroup.apply(currentResourceGroup => `store${currentResourceGroup.id}`);
 const storageAccount = new azure_native.storage.StorageAccount("storageAccount", {
+    accountName: storageAccountName,
     kind: "StorageV2",
     location: location,
     resourceGroupName: currentResourceGroup.apply(currentResourceGroup => currentResourceGroup.name),

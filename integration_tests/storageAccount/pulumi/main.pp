@@ -17,6 +17,7 @@ config storageAccountName "string" {
     default = "store${currentResourceGroup.id}"
 }
 resource storageAccount "azure-native:storage:StorageAccount" {
+    accountName = storageAccountName
     kind = "StorageV2"
     location = location
     resourceGroupName = currentResourceGroup.name

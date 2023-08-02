@@ -14,6 +14,7 @@ const location = config.get("location") || currentResourceGroup.apply(currentRes
 // The name of the storage account
 const storageAccountName = config.get("storageAccountName") || currentResourceGroup.apply(currentResourceGroup => `store${currentResourceGroup.id}`);
 const storageAccount = new azure_native.storage.StorageAccount("storageAccount", {
+    accountName: storageAccountName,
     kind: "StorageV2",
     location: location,
     resourceGroupName: currentResourceGroup.apply(currentResourceGroup => currentResourceGroup.name),
