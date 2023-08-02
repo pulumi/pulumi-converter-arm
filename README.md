@@ -1,28 +1,70 @@
-# pulumi-converter-bicep
+# pulumi-converter-arm
 
-A Pulumi converter plugin to convert Bicep files to Pulumi languages. Currently work in progress.
+A Pulumi converter plugin to convert ARM templates to Pulumi languages. Currently work in progress.
 
 ### Installation
 
 ```
-pulumi plugin install converter bicep --server github://api.github.com/Zaid-Ajaj
+pulumi plugin install converter arm --server github://api.github.com/Zaid-Ajaj
 ```
 
 ### Usage
-In a directory with a single Bicep file, run the following command:
+In a directory with a single ARM template file, run the following command:
 ```
-pulumi convert --from bicep --language <language> --out pulumi
+pulumi convert --from arm --language <language> --out pulumi
 ```
-Will convert Bicep code into your language of choice: `typescript`, `csharp`, `python`, `go`, `java` or `yaml`
+Will convert ARM template into your language of choice: `typescript`, `csharp`, `python`, `go`, `java` or `yaml`
 
 ### Example
-```bicep
-resource storage 'Microsoft.Storage/storageAccounts@2022-09-01' = {
-  name: 'storageaccount'
-  location: resourceGroup().location
-  kind: 'StorageV2'
-  sku: {
-    name: 'Standard_LRS'
+```json
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "storageAccountType": {
+      "type": "string",
+      "defaultValue": "Standard_LRS",
+      "metadata": {
+        "description": "Storage Account type"
+      }
+    },
+    "location": {
+      "type": "string",
+      "defaultValue": "[resourceGroup().location]",
+      "metadata": {
+        "description": "The storage account location."
+      }
+    },
+    "storageAccountName": {
+      "type": "string",
+      "defaultValue": "[format('store{0}', uniqueString(resourceGroup().id))]",
+      "metadata": {
+        "description": "The name of the storage account"
+      }
+    }
+  },
+  "resources": [
+    {
+      "type": "Microsoft.Storage/storageAccounts",
+      "apiVersion": "2022-09-01",
+      "name": "[parameters('storageAccountName')]",
+      "location": "[parameters('location')]",
+      "sku": {
+        "name": "[parameters('storageAccountType')]"
+      },
+      "kind": "StorageV2",
+      "properties": {}
+    }
+  ],
+  "outputs": {
+    "accountName": {
+      "type": "string",
+      "value": "[parameters('storageAccountName')]"
+    },
+    "storageAccountId": {
+      "type": "string",
+      "value": "[resourceId('Microsoft.Storage/storageAccounts', parameters('storageAccountName'))]"
+    }
   }
 }
 ```
@@ -37,15 +79,22 @@ const resourceGroupName = config.require("resourceGroupName");
 const currentResourceGroup = azure_native.resources.getResourceGroupOutput({
     resourceGroupName: resourceGroupName,
 });
-const storage = new azure_native.storage.StorageAccount("storageaccount", {
+// Storage Account type
+const storageAccountType = config.get("storageAccountType") || "Standard_LRS";
+// The storage account location.
+const location = config.get("location") || currentResourceGroup.apply(currentResourceGroup => currentResourceGroup.location);
+// The name of the storage account
+const storageAccountName = config.get("storageAccountName") || currentResourceGroup.apply(currentResourceGroup => `store${currentResourceGroup.id}`);
+const storageAccount = new azure_native.storage.StorageAccount("storageAccount", {
     kind: "StorageV2",
-    location: currentResourceGroup.apply(currentResourceGroup => currentResourceGroup.location),
+    location: location,
     resourceGroupName: currentResourceGroup.apply(currentResourceGroup => currentResourceGroup.name),
     sku: {
-        name: "Standard_LRS",
+        name: storageAccountType,
     },
 });
-
+export const accountName = storageAccountName;
+export const storageAccountId = storageAccount.id;
 ```
 
 ### Development
@@ -56,11 +105,6 @@ The following commands are available which you can run inside the root directory
 
 ```bash
 dotnet run build 
-```
-
-### Run unit tests
-```bash
-dotnet run tests
 ```
 
 ### Run integration tests
