@@ -1,0 +1,1 @@
+This `Converter` project is pulled from [pulumi-converter-bicep](https://github.com/Zaid-Ajaj/pulumi-converter-bicep) when running `dotnet run sync-bicep-converter` and it contains the logic that converts Bicep to Pulumi languages.
