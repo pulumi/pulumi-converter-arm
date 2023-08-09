@@ -24,22 +24,6 @@ let rec findParent (directory: string) (fileToFind: string) =
 
 let repositoryRoot = findParent __SOURCE_DIRECTORY__ "README.md";
 
-let syncProtoFiles() = GitSync.repository {
-    remoteRepository = "https://github.com/pulumi/pulumi.git"
-    localRepositoryPath = repositoryRoot
-    contents = [
-        GitSync.folder {
-            sourcePath = [ "proto"; "pulumi" ]
-            destinationPath = [ "proto"; "pulumi" ]
-        }
-
-        GitSync.folder {
-            sourcePath = [ "proto"; "google"; "protobuf" ]
-            destinationPath = [ "proto"; "google"; "protobuf" ]
-        }
-    ]
-}
-
 let syncBicepConverter() = GitSync.repository {
     remoteRepository = "https://github.com/Zaid-Ajaj/pulumi-converter-bicep.git"
     localRepositoryPath = repositoryRoot
@@ -226,7 +210,6 @@ let createAndPublishArtifacts() =
 [<EntryPoint>]
 let main(args: string[]) : int =
     match args with
-    | [| "sync-proto-files" |] -> syncProtoFiles()
     | [| "integration-tests" |] -> integrationTests()
     | [| "build" |] -> buildSolution()
     | [| "version" |] -> printfn $"{converterVersion()}"

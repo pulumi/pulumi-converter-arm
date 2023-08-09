@@ -1,34 +1,30 @@
 ﻿module Program
 
 open System
-open System.Threading
 open Bicep.Core
 open Bicep.Core.FileSystem
 open Foundatio.Storage
-open Pulumirpc
 open Converter
 open System.IO
-open PulumiConverterPlugin
+open Pulumi.Experimental.Converter
+open Pulumi.Codegen
 open Bicep.Decompiler
 
 let errorResponse (message: string) = 
-    let response = ConvertProgramResponse()
-    let errorDiagnostic = Codegen.Diagnostic()
-    errorDiagnostic.Summary <- message
-    errorDiagnostic.Severity <- Codegen.DiagnosticSeverity.DiagError
-    response.Diagnostics.Add(errorDiagnostic)
-    response
+    let diagnostics = ResizeArray [
+        Diagnostic(Summary=message, Severity=DiagnosticSeverity.Error)
+    ]
+    
+    ConvertProgramResponse(Diagnostics=diagnostics)
 
-let emptyResponse() = ConvertProgramResponse()
-
-let convertProgram (request: ConvertProgramRequest) = task {
+let convertProgram (request: ConvertProgramRequest): ConvertProgramResponse = 
     let armFile =
        Directory.EnumerateFiles(request.SourceDirectory)
        |> Seq.tryFind (fun file -> Path.GetExtension(file) = ".json")
 
     match armFile with
     | None -> 
-        return errorResponse "No ARM file found in the source directory"
+        errorResponse "No ARM file found in the source directory"
     | Some entryArmFile ->
         let content = File.ReadAllText entryArmFile
         let workspace = Workspaces.Workspace()
@@ -48,29 +44,13 @@ let convertProgram (request: ConvertProgramRequest) = task {
             targetDirectory = request.TargetDirectory
             storage = storage
         }
-        
+
         match result with
-        | Error error -> return errorResponse error
-        | Ok() -> return emptyResponse()
-}
+        | Error error -> errorResponse error
+        | Ok() -> ConvertProgramResponse.Empty
 
-let convertState (request: ConvertStateRequest) = task {
-    let response = ConvertStateResponse()
-    return response
-}
-
-type BicepConverterService() = 
-    inherit Converter.ConverterBase()
-    override _.ConvertProgram(request, ctx) = convertProgram(request)
-    override _.ConvertState(request, ctx) = convertState(request)
-
-let serve args =
-    let cancellationToken = CancellationToken()
-    PulumiConverterPlugin.Serve<BicepConverterService>(args, cancellationToken, System.Console.Out)
-    |> Async.AwaitTask
-    |> Async.RunSynchronously
-
-[<EntryPoint>]
-let main(args: string[]) =
-    serve args
-    0
+convertProgram
+|> Converter.CreateSimple
+|> Converter.Serve
+|> Async.AwaitTask
+|> Async.RunSynchronously
