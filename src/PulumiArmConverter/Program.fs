@@ -24,8 +24,8 @@ let convertProgram (request: ConvertProgramRequest): ConvertProgramResponse =
        |> Seq.tryFind (fun (argKey, argValue) -> argKey = "--entry")
        |> Option.map (fun (_, entry) ->
            if not (entry.EndsWith ".json")
-           then entry
-           else entry + ".json")
+           then entry + ".json"
+           else entry)
        |> Option.map (fun entryArm ->
            if Path.IsPathRooted(entryArm)
            then entryArm
