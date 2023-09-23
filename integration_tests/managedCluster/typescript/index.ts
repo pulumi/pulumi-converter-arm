@@ -29,7 +29,7 @@ const servicePrincipalClientId = config.require("servicePrincipalClientId");
 const servicePrincipalClientSecret = config.require("servicePrincipalClientSecret");
 // The type of operating system.
 const osType = config.get("osType") || "Linux";
-const cluster = new azure_native.containerservice.ManagedCluster("cluster", {
+const cluster = new azure_native.containerservice/v20200301.ManagedCluster("cluster", {
     agentPoolProfiles: [{
         count: agentCount,
         name: "agentpool",
@@ -47,8 +47,7 @@ const cluster = new azure_native.containerservice.ManagedCluster("cluster", {
         },
     },
     location: location,
-    resourceGroupName: currentResourceGroup.apply(currentResourceGroup => currentResourceGroup.name),
-    resourceName: clusterName,
+    resourceGroupName: currentResourceGroup.name,
     servicePrincipalProfile: {
         clientId: servicePrincipalClientId,
         secret: servicePrincipalClientSecret,

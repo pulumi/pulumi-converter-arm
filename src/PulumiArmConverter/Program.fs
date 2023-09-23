@@ -19,12 +19,25 @@ let errorResponse (message: string) =
 
 let convertProgram (request: ConvertProgramRequest): ConvertProgramResponse = 
     let armFile =
-       Directory.EnumerateFiles(request.SourceDirectory)
-       |> Seq.tryFind (fun file -> Path.GetExtension(file) = ".json")
+       request.Args
+       |> Seq.pairwise
+       |> Seq.tryFind (fun (argKey, argValue) -> argKey = "--entry")
+       |> Option.map (fun (_, entry) ->
+           if not (entry.EndsWith ".json")
+           then entry
+           else entry + ".json")
+       |> Option.map (fun entryArm ->
+           if Path.IsPathRooted(entryArm)
+           then entryArm
+           else Path.Combine(request.SourceDirectory, entryArm))
+       |> Option.orElse (
+           Directory.EnumerateFiles(request.SourceDirectory)
+           |> Seq.tryFind (fun file -> Path.GetExtension(file) = ".json")
+       )
 
     match armFile with
     | None -> 
-        errorResponse "No ARM file found in the source directory"
+        errorResponse "Could not find the entry ARM file from the source directory"
     | Some entryArmFile ->
         let content = File.ReadAllText entryArmFile
         let workspace = Workspaces.Workspace()

@@ -43,7 +43,7 @@ config osType "string" {
     description = "The type of operating system."
     default = "Linux"
 }
-resource cluster "azure-native:containerservice:ManagedCluster" {
+resource cluster "azure-native:containerservice/v20200301:ManagedCluster" {
     agentPoolProfiles = [
         {
             count = agentCount
@@ -68,7 +68,6 @@ resource cluster "azure-native:containerservice:ManagedCluster" {
     }
     location = location
     resourceGroupName = currentResourceGroup.name
-    resourceName = clusterName
     servicePrincipalProfile = {
         clientId = servicePrincipalClientId
         secret = servicePrincipalClientSecret
