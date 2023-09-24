@@ -30,6 +30,7 @@ let convertProgram (request: ConvertProgramRequest): ConvertProgramResponse =
            if Path.IsPathRooted(entryArm)
            then entryArm
            else Path.Combine(request.SourceDirectory, entryArm))
+       |> Option.filter File.Exists
        |> Option.orElse (
            Directory.EnumerateFiles(request.SourceDirectory)
            |> Seq.tryFind (fun file -> Path.GetExtension(file) = ".json")

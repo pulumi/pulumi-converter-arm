@@ -13,7 +13,7 @@ pulumi plugin install converter arm --server github://api.github.com/Zaid-Ajaj
 ### Usage
 In a directory with a single ARM template file, run the following command:
 ```
-pulumi convert --from arm --language <language> --out pulumi
+pulumi convert --from arm --language <language> --out pulumi -- --entry <entry-file>
 ```
 Will convert ARM template into your language of choice: `typescript`, `csharp`, `python`, `go`, `java` or `yaml`
 
