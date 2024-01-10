@@ -25,7 +25,7 @@ let rec findParent (directory: string) (fileToFind: string) =
 let repositoryRoot = findParent __SOURCE_DIRECTORY__ "README.md";
 
 let syncBicepConverter() = GitSync.repository {
-    remoteRepository = "https://github.com/Zaid-Ajaj/pulumi-converter-bicep.git"
+    remoteRepository = "https://github.com/pulumi/pulumi-converter-bicep.git"
     localRepositoryPath = repositoryRoot
     contents = [
         GitSync.folder {
@@ -38,15 +38,21 @@ let syncBicepConverter() = GitSync.repository {
 let pulumiCliBinary() : Task<string> = task {
     try
         // try to get the version of pulumi installed on the system
-        let! version =
+        let! pulumiVersionResult =
             Cli.Wrap("pulumi")
                 .WithArguments("version")
-                .WithValidation(CommandResultValidation.ZeroExitCode)
-                .ExecuteAsync()
+                .WithValidation(CommandResultValidation.None)
+                .ExecuteBufferedAsync()
 
-        return "pulumi"
+        let version = pulumiVersionResult.StandardOutput.Trim()
+        let versionRegex = Text.RegularExpressions.Regex("v[0-9]+\\.[0-9]+\\.[0-9]+")
+        if versionRegex.IsMatch version then
+            return "pulumi"
+        else
+            return! failwith "Pulumi not installed"
     with
-    | _ ->
+    | error ->
+        printfn "%A" error
         // when pulumi is not installed, try to get the version of of the dev build
         // installed on the system using `make install` in the pulumi repo
         let homeDir = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile)
@@ -187,7 +193,7 @@ let createAndPublishArtifacts() =
     else
         printfn "GITHUB_TOKEN is not set"
 
-    let githubUsername = "Zaid-Ajaj"
+    let githubUsername = "pulumi"
     let githubRepo = "pulumi-converter-arm"
     let releases = await (github.Repository.Release.GetAll(githubUsername, githubRepo))
     let alreadyReleased = releases |> Seq.exists (fun release -> releaseVersion release = version)

@@ -2,12 +2,12 @@
 
 A Pulumi converter plugin to convert ARM templates to Pulumi languages. Currently work in progress.
 
-This plugin uses the converter logic from [pulumi-converter-bicep](https://github.com/Zaid-Ajaj/pulumi-converter-bicep). First it converts the ARM template to Bicep and then uses the Bicep converter to convert to Pulumi languages.
+This plugin uses the converter logic from [pulumi-converter-bicep](https://github.com/pulumi/pulumi-converter-bicep). First it converts the ARM template to Bicep and then uses the Bicep converter to convert to Pulumi languages.
 
 ### Installation
 
 ```
-pulumi plugin install converter arm --server github://api.github.com/Zaid-Ajaj
+pulumi plugin install converter arm
 ```
 
 ### Usage
